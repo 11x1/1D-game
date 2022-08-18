@@ -196,14 +196,16 @@ const trace = {
 
 
 const input = {
+    key_data: { },
+
     key_to_rotate_amount: {
-        'a': -4,
-        'd': 4,
+        'a': -2,
+        'd': 2,
     },
 
     key_to_move_amount: {
-        'w': 2,
-        's': -2,
+        'w': 1,
+        's': -1,
     },
 
     rotate_player: ( amount ) => {
@@ -240,17 +242,13 @@ const input_handler = ( ) => {
     document.addEventListener( 'keydown', ( e ) => {
         /* Handle input */
         const pressed_key = e.key;
-        const rotate_amount = input.key_to_rotate_amount[ pressed_key ];
-        if ( rotate_amount ) {
-            input.rotate_player( rotate_amount );
-            return
-        }
+        input.key_data[ pressed_key ] = true;
+    } );
 
-        const move_amount = input.key_to_move_amount[ pressed_key ];
-        if ( move_amount && input.can_move( move_amount, game_walls ) ) {
-            input.move_player( move_amount );
-            return
-        }
+    document.addEventListener( 'keyup', ( e ) => {
+        /* Handle input */
+        const pressed_key = e.key;
+        input.key_data[ pressed_key ] = false;
     } );
 }
 
@@ -354,12 +352,29 @@ const render_handler_2d = ( ) => {
         }
     }
 
+    /* Update player */
+    if ( input.key_data[ 'a' ] || input.key_data[ 'd' ] ) {
+        let pressed = input.key_data[ 'a' ] ? 'a' : 'd';
+        const rotate_amount = input.key_to_rotate_amount[ pressed ];
+        if ( rotate_amount ) {
+            input.rotate_player( rotate_amount );
+        }
+    }
+    
+    if ( input.key_data[ 'w' ] || input.key_data[ 's' ] ) {
+        let pressed = input.key_data[ 'w' ] ? 'w' : 's';
+        const move_amount = input.key_to_move_amount[ pressed ];
+        if ( move_amount && input.can_move( move_amount, game_walls ) ) {
+            input.move_player( move_amount );
+        }
+    }
+
+
     /* Draw player */
     render.draw_player( ctx, player_pos );
     render.debug.draw_fov( ctx, player_fov );
 
     window.requestAnimationFrame( render_handler_2d );
-
 }
 
 const render_handler_1d = ( ) => {
